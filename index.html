@@ -1,0 +1,65 @@
+
+<section id="music-mixer" style="background:#101018;color:#eee;padding:20px;border:1px solid #a78bfa;border-radius:16px;font-family:Arial">
+  <h2 style="color:#c4b5fd">VANTA MUSIC MIXER</h2>
+
+  <label>🎵 اختار أغنية من موبايلك</label>
+  <input id="songFile" type="file" accept="audio/*" style="display:block;margin:12px 0">
+
+  <audio id="song" controls style="width:100%"></audio>
+
+  <label>🔊 صوت الأغنية</label>
+  <input id="songVolume" type="range" min="0" max="100" value="70" style="width:100%">
+
+  <hr style="border-color:#444;margin:20px 0">
+
+  <button id="micBtn" style="background:#8b5cf6;color:white;padding:12px;border:0;border-radius:8px">
+    🎙️ تشغيل المايك
+  </button>
+
+  <p>🎚️ مستوى صوت المايك</p>
+  <input id="micVolume" type="range" min="0" max="200" value="100" style="width:100%">
+
+  <p id="status">جاهز للتشغيل</p>
+</section>
+
+<script>
+const song = document.getElementById("song");
+const songFile = document.getElementById("songFile");
+const songVolume = document.getElementById("songVolume");
+const micBtn = document.getElementById("micBtn");
+const micVolume = document.getElementById("micVolume");
+const statusText = document.getElementById("status");
+
+songFile.addEventListener("change", () => {
+  const file = songFile.files[0];
+  if (!file) return;
+  song.src = URL.createObjectURL(file);
+  song.load();
+});
+
+song.volume = 0.7;
+
+songVolume.addEventListener("input", () => {
+  song.volume = Number(songVolume.value) / 100;
+});
+
+let micStream;
+
+micBtn.addEventListener("click", async () => {
+  try {
+    if (micStream) {
+      micStream.getTracks().forEach(track => track.stop());
+      micStream = null;
+      micBtn.textContent = "🎙️ تشغيل المايك";
+      statusText.textContent = "تم إيقاف المايك";
+      return;
+    }
+
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    micBtn.textContent = "⏹️ إيقاف المايك";
+    statusText.textContent = "المايك يعمل داخل المتصفح";
+  } catch (error) {
+    statusText.textContent = "تعذر تشغيل المايك: اسمح بصلاحية الميكروفون";
+  }
+});
+</script>
